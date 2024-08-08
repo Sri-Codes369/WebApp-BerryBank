@@ -47,7 +47,7 @@ const CardWrapper = styled(MainCard)(({ theme }) => ({
 
 // ==============================|| DASHBOARD - TOTAL INCOME DARK CARD ||============================== //
 
-const TotalIncomeDarkCard = ({ isLoading }) => {
+const TotalIncomeDarkCard = ({ isLoading, total, icon, label  }) => {
   const theme = useTheme();
 
   return (
@@ -69,19 +69,19 @@ const TotalIncomeDarkCard = ({ isLoading }) => {
                       color: '#fff'
                     }}
                   >
-                    <TableChartOutlinedIcon fontSize="inherit" />
+                    {icon}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   sx={{ py: 0, my: 0.45 }}
                   primary={
                     <Typography variant="h4" sx={{ color: '#fff' }}>
-                      $203k
+                     ${total}k
                     </Typography>
                   }
                   secondary={
                     <Typography variant="subtitle2" sx={{ color: 'primary.light', mt: 0.25 }}>
-                      Total Income
+                      {label}
                     </Typography>
                   }
                 />

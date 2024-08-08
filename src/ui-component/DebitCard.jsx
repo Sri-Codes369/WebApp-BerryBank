@@ -7,11 +7,9 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-
-// assets
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
-// ===========================|| CARD COMPONENT ||=========================== //
+// ===========================|| CREDIT CARD COMPONENT ||=========================== //
 
 const DebitCard = ({ cardHolder, cardNumber, expiryDate, balance }) => {
   const theme = useTheme();
@@ -19,15 +17,34 @@ const DebitCard = ({ cardHolder, cardNumber, expiryDate, balance }) => {
   return (
     <Box
       sx={{
-        borderRadius: '10px',
-        bgcolor: theme.palette.primary.main,
+        bgcolor: 'primary.dark',
         color: '#fff',
         overflow: 'hidden',
         position: 'relative',
-        width: '300px',
+        borderRadius: '10px',
         p: 2.25,
         boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-        mb: 2
+        '&:after': {
+          content: '""',
+          position: 'absolute',
+          width: 210,
+          height: 210,
+          background: theme.palette.primary[800],
+          borderRadius: '50%',
+          top: { xs: -105, sm: -85 },
+          right: { xs: -140, sm: -95 }
+        },
+        '&:before': {
+          content: '""',
+          position: 'absolute',
+          width: 210,
+          height: 210,
+          background: theme.palette.primary[800],
+          borderRadius: '50%',
+          top: { xs: -155, sm: -125 },
+          right: { xs: -70, sm: -15 },
+          opacity: 0.5
+        }
       }}
     >
       <Grid container direction="column">
@@ -46,11 +63,14 @@ const DebitCard = ({ cardHolder, cardNumber, expiryDate, balance }) => {
               <Avatar
                 variant="rounded"
                 sx={{
-                  bgcolor: theme.palette.primary[800],
-                  color: 'secondary.200'
+                  ...theme.typography.commonAvatar,
+                  ...theme.typography.mediumAvatar,
+                  bgcolor: 'primary.dark',
+                  color: 'primary.200',
+                  zIndex: 1
                 }}
               >
-                <MoreHorizIcon />
+                <MoreHorizIcon fontSize="inherit" />
               </Avatar>
             </Grid>
           </Grid>
