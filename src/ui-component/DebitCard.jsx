@@ -17,7 +17,7 @@ const DebitCard = ({ cardHolder, cardNumber, expiryDate, balance }) => {
   return (
     <Box
       sx={{
-        bgcolor: 'primary.dark',
+        bgcolor: 'primary.200',
         color: '#fff',
         overflow: 'hidden',
         position: 'relative',

@@ -10,16 +10,20 @@ import TotalOrderLineChartCard from './TotalOrderLineChartCard';
 import TotalIncomeDarkCard from './TotalIncomeDarkCard';
 import TotalIncomeLightCard from './TotalIncomeLightCard';
 import TotalGrowthBarChart from './TotalGrowthBarChart';
+import TotalDepositedCard from './TotalDepositedCard'
 
 import { gridSpacing } from 'store/constant';
 
 // assets
 import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
+import WalletIcon from '@mui/icons-material/Wallet';
+import SavingsIcon from '@mui/icons-material/Savings';
 import DebitCard from 'ui-component/DebitCard';
 import CreditCard from 'ui-component/CreditCard';
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-
+import SubCard from 'ui-component/cards/SubCard';
+import ConfigurableTransactionTable from 'ui-component/ConfigurableTransactionTable';
 const cardData = [
   {
     id: 1,
@@ -47,6 +51,26 @@ const cardData = [
   }
 ];
 
+
+const columns = [
+
+  { id: 'id', label: 'Transaction ID' },
+  { id: 'type', label: 'Type' },
+  { id: 'card', label: 'Card' },
+  { id: 'date', label: 'Date' },
+  { id: 'amount', label: 'Amount' },
+ 
+];
+
+const transactionData = [
+  { id: 1, date: '28 Jan, 12:30 AM', description: 'Spotify Subscription', type: 'Shopping', card: '1234 ****', amount: '-$2,500', income: false },
+  { id: 2, date: '25 Jan, 10:40 PM', description: 'Freepik Sales', type: 'Transfer', card: '1234 ****', amount: '+$750', income: true },
+  { id: 3, date: '20 Jan, 10:40 PM', description: 'Mobile Service', type: 'Service', card: '1234 ****', amount: '-$150', income: false },
+  { id: 4, date: '15 Jan, 03:29 PM', description: 'Wilson', type: 'Transfer', card: '1234 ****', amount: '-$1,050', income: false },
+  { id: 5, date: '14 Jan, 10:40 PM', description: 'Emilly', type: 'Transfer', card: '1234 ****', amount: '+$840', income: true },
+];
+
+
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
 const Dashboard = () => {
@@ -66,7 +90,17 @@ const Dashboard = () => {
                 isLoading: isLoading,
                 total: 203,
                 label: 'Total Balance',
-                icon: <StorefrontTwoToneIcon fontSize="inherit" />
+                icon: <SavingsIcon fontSize="inherit" />
+              }}
+            />
+          </Grid>
+          <Grid item lg={4} md={6} sm={6} xs={12}>
+            <TotalDepositedCard
+              {...{
+                isLoading: isLoading,
+                total: 203,
+                label: 'Deposit',
+                icon: <WalletIcon fontSize="inherit" />
               }}
             />
           </Grid>
@@ -76,14 +110,15 @@ const Dashboard = () => {
                 isLoading: isLoading,
                 total: 203,
                 label: 'Total Spending',
-                icon: <StorefrontTwoToneIcon fontSize="inherit" />
+                icon: <WalletIcon fontSize="inherit" />
               }}
             />
           </Grid>
+          
           <Grid item lg={4} md={12} sm={12} xs={12}>
             <Carousel
-              showThumbs={false}
-              showStatus={false}
+              showThumbs={true}
+              showStatus={true}
               infiniteLoop
               useKeyboardArrows
               autoPlay
@@ -110,11 +145,23 @@ const Dashboard = () => {
               ))}
             </Carousel>
           </Grid>
+          {/* <Grid>
+          <SubCard title="sub title">
+            <ConfigurableTransactionTable
+              rows={transactionData}
+              columns={columns}
+              rowsPerPageOptions={[3,5, 10, 25]}
+              defaultRowsPerPage={3}
+              showRowsPerPageOptions={false} // Hide the dropdown for rows per page
+              sortable={true} // Enable sorting
+            />
+          </SubCard>
+          </Grid> */}
         </Grid>
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <PopularCard isLoading={isLoading} />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 };

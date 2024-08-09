@@ -17,7 +17,7 @@ const CreditCard = ({ cardHolder, cardNumber, expiryDate, balance }) => {
   return (
     <Box
       sx={{
-        bgcolor: 'secondary.dark',
+        bgcolor: 'secondary.200',
         color: '#fff',
         overflow: 'hidden',
         position: 'relative',
