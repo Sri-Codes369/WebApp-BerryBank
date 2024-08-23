@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
+import { element } from 'prop-types';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard')));
@@ -11,6 +12,7 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard')));
 const UtilsTransactions = Loadable(lazy(() => import('views/utilities/Transactions')));
 const UtilsCards = Loadable(lazy(() => import('views/utilities/MoneyCards')));
 const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
+const UtilsBeneficiaries = Loadable(lazy(() => import('views/utilities/Beneficiaries')))
 // const UtilsMaterialIcons = Loadable(lazy(() => import('views/utilities/MaterialIcons')));
 // const UtilsTablerIcons = Loadable(lazy(() => import('views/utilities/TablerIcons')));
 
@@ -60,6 +62,15 @@ const MainRoutes = {
         {
           path: 'util-shadow',
           element: <UtilsShadow />
+        }
+      ]
+    },
+    {
+      path: 'utils',
+      children: [
+        {
+          path: 'util-beneficiary',
+          element : <UtilsBeneficiaries />
         }
       ]
     },
