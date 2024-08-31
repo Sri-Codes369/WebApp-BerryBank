@@ -1,6 +1,11 @@
 // assets
 import { IconDashboard } from '@tabler/icons-react';
-import { IconTransactionRupee  , IconCreditCard , IconShadow, IconWindmill, IconFriends  } from '@tabler/icons-react';
+import { IconTransactionRupee  ,
+   IconCreditCard , 
+   IconShadow, 
+   IconWindmill,
+   IconReportMoney , 
+   IconFriends  } from '@tabler/icons-react';
 // constant
 const icons = { 
   IconDashboard,
@@ -8,7 +13,8 @@ const icons = {
   IconCreditCard,
   IconShadow,
   IconWindmill,
-  IconFriends 
+  IconFriends,
+  IconReportMoney
  };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
@@ -56,6 +62,14 @@ const dashboard = {
       type: 'item',
       url: '/utils/util-beneficiary',
       icon: icons.IconFriends,
+      breadcrumbs: false
+    },
+    {
+      id: 'util-accounts',
+      title: 'Accounts',
+      type: 'item',
+      url: '/utils/util-accounts',
+      icon: icons.IconReportMoney,
       breadcrumbs: false
     }
   ]

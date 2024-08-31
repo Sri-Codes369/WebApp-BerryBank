@@ -19,6 +19,7 @@ const UtilsTransactions = Loadable(lazy(() => import('views/utilities/Transactio
 const UtilsCards = Loadable(lazy(() => import('views/utilities/MoneyCards')));
 const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 const UtilsBeneficiaries = Loadable(lazy(() => import('views/utilities/Beneficiaries')));
+const UtilsAccounts = Loadable(lazy(() => import('views/utilities/Accounts')))
 
 // sample page routing
 const SamplePage = Loadable(lazy(() => import('views/sample-page')));
@@ -71,6 +72,10 @@ const routes = [
           {
             path: 'utils/util-beneficiary',
             element: <UtilsBeneficiaries />
+          },
+          {
+            path: 'utils/util-accounts',
+            element: <UtilsAccounts />
           },
           {
             path: 'sample-page',
