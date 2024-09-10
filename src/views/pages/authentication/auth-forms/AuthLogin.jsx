@@ -87,7 +87,7 @@ const AuthLogin = ({ ...others }) => {
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          email: Yup.string().max(255).required('Email is required'),
+          email: Yup.string().max(255).required('Email/Username is required'),
           password: Yup.string().max(255).required('Password is required')
         })}
         onSubmit={handleLogin}
@@ -145,11 +145,11 @@ const AuthLogin = ({ ...others }) => {
               )}
             </FormControl>
 
-            <Grid container alignItems="center" justifyContent="space-between">
+            {/* <Grid container alignItems="center" justifyContent="space-between">
               <Typography variant="subtitle1" color="secondary" sx={{ textDecoration: 'none', cursor: 'pointer' }}>
                 Forgot Password?
               </Typography>
-            </Grid>
+            </Grid> */}
 
             {errors.submit && (
               <Box sx={{ mt: 3 }}>

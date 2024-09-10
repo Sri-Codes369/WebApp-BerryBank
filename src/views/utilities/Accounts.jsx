@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Grid, Tabs, Tab, Button, TextField, Typography, MenuItem, Box } from '@mui/material';
+import {
+    Grid, Stepper, Step, StepLabel, StepIcon, Button, TextField, Typography, MenuItem, Box
+} from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import SubCard from 'ui-component/cards/SubCard';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PersonIcon from '@mui/icons-material/Person';
+import SecurityIcon from '@mui/icons-material/Security';
+import ReviewIcon from '@mui/icons-material/AssignmentTurnedIn';
 
 const NewAccountForm = () => {
-    const [tabValue, setTabValue] = useState(0);
+    const [activeStep, setActiveStep] = useState(0);
     const [accountType, setAccountType] = useState('');
     const [userInfo, setUserInfo] = useState({
         name: '',
@@ -39,8 +45,34 @@ const NewAccountForm = () => {
             });
     }, []);
 
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
+    const steps = [
+        { label: 'Choose Account Type', icon: <AccountCircleIcon /> },
+        { label: 'User Information', icon: <PersonIcon /> },
+        { label: 'KYC Details', icon: <SecurityIcon /> },
+        { label: 'Review & Submit', icon: <ReviewIcon /> },
+    ];
+
+    const handleNext = () => {
+        if (canProceedToNextStep()) {
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+    };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+
+    const canProceedToNextStep = () => {
+        switch (activeStep) {
+            case 0:
+                return accountType !== '';
+            case 1:
+                return userInfo.name && userInfo.email && userInfo.phone && userInfo.address;
+            case 2:
+                return kycType !== '' && kycNumber !== '';
+            default:
+                return true;
+        }
     };
 
     const handleInputChange = (e) => {
@@ -61,15 +93,16 @@ const NewAccountForm = () => {
 
     return (
         <MainCard title="Open New Account">
-            <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
-                <Tab label="Choose Account Type" />
-                <Tab label="User Information" />
-                <Tab label="KYC Details" />
-                <Tab label="Review & Submit" />
-            </Tabs>
+            <Stepper activeStep={activeStep} alternativeLabel>
+                {steps.map((step, index) => (
+                    <Step key={index}>
+                        <StepLabel StepIconComponent={() => <StepIcon>{step.icon}</StepIcon>}>{step.label}</StepLabel>
+                    </Step>
+                ))}
+            </Stepper>
 
             <SubCard>
-                {tabValue === 0 && (
+                {activeStep === 0 && (
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
@@ -90,7 +123,7 @@ const NewAccountForm = () => {
                     </Grid>
                 )}
 
-                {tabValue === 1 && (
+                {activeStep === 1 && (
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
@@ -142,7 +175,7 @@ const NewAccountForm = () => {
                     </Grid>
                 )}
 
-                {tabValue === 2 && (
+                {activeStep === 2 && (
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
@@ -174,7 +207,7 @@ const NewAccountForm = () => {
                     </Grid>
                 )}
 
-                {tabValue === 3 && (
+                {activeStep === 3 && (
                     <Box>
                         <Typography variant="h6">Review Details</Typography>
                         <Typography variant="body1"><strong>Account Type:</strong> {accountTypes.find(type => type.accountTypeID === accountType).accountTypeLabel}</Typography>
@@ -189,6 +222,28 @@ const NewAccountForm = () => {
                         </Button>
                     </Box>
                 )}
+
+                <Box mt={2}>
+                    <Button
+                        disabled={activeStep === 0}
+                        onClick={handleBack}
+                        variant="outlined"
+                        color="secondary"
+                    >
+                        Back
+                    </Button>
+                    {activeStep < steps.length - 1 && (
+                        <Button
+                            disabled={!canProceedToNextStep()}
+                            variant="contained"
+                            color="primary"
+                            onClick={handleNext}
+                            style={{ marginLeft: '10px' }}
+                        >
+                            Next
+                        </Button>
+                    )}
+                </Box>
             </SubCard>
         </MainCard>
     );
