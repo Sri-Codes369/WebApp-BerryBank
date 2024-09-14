@@ -3,7 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, StyledEngineProvider } from '@mui/material';
-
+import { useEffect } from 'react';
 // routing
 import router from 'routes';
 
@@ -12,10 +12,15 @@ import themes from 'themes';
 
 // project imports
 import NavigationScroll from 'layout/NavigationScroll';
+import initializeTokenService from 'TokenService';
 
 // ==============================|| APP ||============================== //
 
 const App = () => {
+  useEffect(() => {
+    // Initialize the token service when the app loads
+    initializeTokenService();
+  }, []);
   const customization = useSelector((state) => state.customization);
 
   return (
