@@ -30,10 +30,6 @@ const AdminDashboard = () => {
                     </ListItem>
                 ))}
             </List>
-            <Button variant="contained" color="primary" onClick={() => setShowNewAccountForm(true)}>
-                Create New Account
-            </Button>
-            {showNewAccountForm && <NewAccountForm />}
         </Box>
     );
 };

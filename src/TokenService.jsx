@@ -6,9 +6,9 @@ let lastActivityTime = new Date().getTime();
 const extendTokenIfNeeded = async () => {
   const now = new Date().getTime();
   const timeSinceLastActivity = now - lastActivityTime;
-console.log(lastActivityTime);
-console.log(timeSinceLastActivity);
-console.log('--------------');
+// console.log(lastActivityTime);
+// console.log(timeSinceLastActivity);
+// console.log('--------------');
 
 
 

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
-    Grid, Stepper, Step, StepLabel, StepIcon, Button, TextField, Typography, MenuItem, Box
+    Grid, Stepper, Step, StepLabel, Button, TextField, Typography, MenuItem, Box
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import SubCard from 'ui-component/cards/SubCard';
@@ -9,25 +9,33 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonIcon from '@mui/icons-material/Person';
 import SecurityIcon from '@mui/icons-material/Security';
 import ReviewIcon from '@mui/icons-material/AssignmentTurnedIn';
+import AuthService from 'services/AuthService';
+import { Toast } from 'primereact/toast';
 
-const NewAccountForm = () => {
+const NewAccountForm = ({_accountTypeID}) => {
+   
     const [activeStep, setActiveStep] = useState(0);
-    const [accountType, setAccountType] = useState('');
+    const [accountTypeId, setAccountTypeId] = useState('');  // DTO: AccountTypeId
     const [userInfo, setUserInfo] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
+        fullName: '',  // DTO: FullName
+        email: '',     // DTO: Email
+        phone: '',     // DTO: Phone
+        address: '',   // DTO: Address
     });
-    const [kycType, setKycType] = useState('');
-    const [kycNumber, setKycNumber] = useState('');
+    const [kycDocumentTypeId, setKycDocumentTypeId] = useState('');  // DTO: KycDocumentTypeId
+    const [kycDocumentNumber, setKycDocumentNumber] = useState('');  // DTO: KycDocumentNumber
 
     const [accountTypes, setAccountTypes] = useState([]);
     const [KYCOptions, setKYCOptions] = useState([]);
 
+    const toast = useRef(null)
+
     useEffect(() => {
+        if (_accountTypeID ===1 || _accountTypeID ===2 || _accountTypeID ===3) {
+            setAccountTypeId(_accountTypeID)
+        }
         // Fetch account types
-        axios.get('http://localhost:8080/api/account-types',{withCredentials:true})
+        axios.get('http://localhost:8080/api/account-types', { withCredentials: true })
             .then(response => {
                 setAccountTypes(response.data);
             })
@@ -36,7 +44,7 @@ const NewAccountForm = () => {
             });
 
         // Fetch KYC options
-        axios.get('http://localhost:8080/api/kyc-options',{withCredentials:true})
+        axios.get('http://localhost:8080/api/kyc-options', { withCredentials: true })
             .then(response => {
                 setKYCOptions(response.data);
             })
@@ -65,11 +73,11 @@ const NewAccountForm = () => {
     const canProceedToNextStep = () => {
         switch (activeStep) {
             case 0:
-                return accountType !== '';
+                return accountTypeId !== '';
             case 1:
-                return userInfo.name && userInfo.email && userInfo.phone && userInfo.address;
+                return userInfo.fullName && userInfo.email && userInfo.phone && userInfo.address;
             case 2:
-                return kycType !== '' && kycNumber !== '';
+                return kycDocumentTypeId !== '' && kycDocumentNumber !== '';
             default:
                 return true;
         }
@@ -79,24 +87,55 @@ const NewAccountForm = () => {
         setUserInfo({ ...userInfo, [e.target.name]: e.target.value });
     };
 
-    const handleKYCChange = (e) => {
-        setKycType(e.target.value);
-    };
-
     const handleSubmit = () => {
-        // Handle final form submission here
-        console.log('Account Type:', accountType);
-        console.log('User Info:', userInfo);
-        console.log('KYC Type:', kycType);
-        console.log('KYC Number:', kycNumber);
+        console.log(AuthService.getUserFromToken()?.userId);
+        
+        // Prepare the DTO object
+        const accountData = {
+            userID: AuthService.getUserFromToken().userId,  // Assuming you will fetch this from the authenticated user
+            accountTypeId, 
+            fullName: userInfo.fullName,
+            email: userInfo.email,
+            phone: userInfo.phone,
+            address: userInfo.address,
+            kycDocumentTypeId,
+            kycDocumentNumber
+        };
+
+        // Log the data
+        console.log('Submitting the following data:', accountData);
+
+        // Call the API
+        axios.post('http://localhost:8080/api/acc-insert', accountData, { withCredentials: true })
+            .then(response => {
+              
+                
+                if (response.data.Code === 0) {
+                    toast.current.show({ severity: 'success', summary: 'Success', detail: 'Request for new account is successful !', life: 3000 });
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else if (response.data.Code === 1) {
+                    toast.current.show({ severity: 'warn', summary: 'Warning', detail: 'Account already exists', life: 3000 });
+                }else if (response.data.Code === 500) {
+                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Account creation failed. Please try again.', life: 3000 });
+                }
+
+            })
+            .catch(error => {
+                console.error('Error creating account:', error);
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Account creation failed. Please try again.', life: 3000 });
+            });
     };
 
     return (
+       
         <MainCard title="Open New Account">
+             <Toast ref={toast} position='top-center' />
             <Stepper activeStep={activeStep} alternativeLabel>
                 {steps.map((step, index) => (
                     <Step key={index}>
-                        <StepLabel StepIconComponent={() => <StepIcon>{step.icon}</StepIcon>}>{step.label}</StepLabel>
+                        <StepLabel>{step.label}</StepLabel>
                     </Step>
                 ))}
             </Stepper>
@@ -108,8 +147,8 @@ const NewAccountForm = () => {
                             <TextField
                                 select
                                 label="Account Type"
-                                value={accountType}
-                                onChange={(e) => setAccountType(e.target.value)}
+                                value={accountTypeId}
+                                onChange={(e) => setAccountTypeId(e.target.value)}
                                 fullWidth
                                 variant="outlined"
                             >
@@ -128,8 +167,8 @@ const NewAccountForm = () => {
                         <Grid item xs={12}>
                             <TextField
                                 label="Full Name"
-                                name="name"
-                                value={userInfo.name}
+                                name="fullName"
+                                value={userInfo.fullName}
                                 onChange={handleInputChange}
                                 fullWidth
                                 variant="outlined"
@@ -181,8 +220,8 @@ const NewAccountForm = () => {
                             <TextField
                                 select
                                 label="KYC Document Type"
-                                value={kycType}
-                                onChange={handleKYCChange}
+                                value={kycDocumentTypeId}
+                                onChange={(e) => setKycDocumentTypeId(e.target.value)}
                                 fullWidth
                                 variant="outlined"
                                 required
@@ -197,8 +236,8 @@ const NewAccountForm = () => {
                         <Grid item xs={12}>
                             <TextField
                                 label="KYC Document Number"
-                                value={kycNumber}
-                                onChange={(e) => setKycNumber(e.target.value)}
+                                value={kycDocumentNumber}
+                                onChange={(e) => setKycDocumentNumber(e.target.value)}
                                 fullWidth
                                 variant="outlined"
                                 required
@@ -210,13 +249,13 @@ const NewAccountForm = () => {
                 {activeStep === 3 && (
                     <Box>
                         <Typography variant="h6">Review Details</Typography>
-                        <Typography variant="body1"><strong>Account Type:</strong> {accountTypes.find(type => type.accountTypeID === accountType).accountTypeLabel}</Typography>
-                        <Typography variant="body1"><strong>Name:</strong> {userInfo.name}</Typography>
+                        <Typography variant="body1"><strong>Account Type:</strong> {accountTypes.find(type => type.accountTypeID === accountTypeId)?.accountTypeLabel}</Typography>
+                        <Typography variant="body1"><strong>Name:</strong> {userInfo.fullName}</Typography>
                         <Typography variant="body1"><strong>Email:</strong> {userInfo.email}</Typography>
                         <Typography variant="body1"><strong>Phone:</strong> {userInfo.phone}</Typography>
                         <Typography variant="body1"><strong>Address:</strong> {userInfo.address}</Typography>
-                        <Typography variant="body1"><strong>KYC Type:</strong> {KYCOptions.find(op => op.kycOptionID === kycType).kycOptionLabel}</Typography>
-                        <Typography variant="body1"><strong>KYC Number:</strong> {kycNumber}</Typography>
+                        <Typography variant="body1"><strong>KYC Type:</strong> {KYCOptions.find(op => op.kycOptionID === kycDocumentTypeId)?.kycOptionLabel}</Typography>
+                        <Typography variant="body1"><strong>KYC Number:</strong> {kycDocumentNumber}</Typography>
                         <Button variant="contained" color="primary" onClick={handleSubmit}>
                             Submit
                         </Button>
