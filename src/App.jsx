@@ -13,11 +13,13 @@ import themes from 'themes';
 // project imports
 import NavigationScroll from 'layout/NavigationScroll';
 import initializeTokenService from 'TokenService';
+import AuthService from 'services/AuthService';
 
 // ==============================|| APP ||============================== //
 
 const App = () => {
   useEffect(() => {
+  
     // Initialize the token service when the app loads
     initializeTokenService();
   }, []);
