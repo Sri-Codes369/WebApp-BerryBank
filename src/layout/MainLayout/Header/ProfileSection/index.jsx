@@ -1,41 +1,34 @@
 import { useState, useRef, useEffect } from 'react';
-
-import { useNavigate } from 'react-router-dom';
+import { Router, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-// material-ui
+// material-ui imports
 import { useTheme } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 
-// third-party
+// third-party imports
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-import UpgradePlanCard from './UpgradePlanCard';
-import User1 from 'assets/images/users/user-round.svg';
+import AuthService from 'services/AuthService';
 
 // assets
-import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons-react';
+import { IconLogout, IconSettings } from '@tabler/icons-react';
+import Cookies from 'js-cookie';
 
 // ==============================|| PROFILE MENU ||============================== //
 
@@ -44,17 +37,23 @@ const ProfileSection = () => {
   const customization = useSelector((state) => state.customization);
   const navigate = useNavigate();
 
-  const [sdm, setSdm] = useState(true);
-  const [value, setValue] = useState('');
-  const [notification, setNotification] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [open, setOpen] = useState(false);
-  /**
-   * anchorRef is used on different componets and specifying one type leads to other components throwing an error
-   * */
+
   const anchorRef = useRef(null);
+
+  // Function to determine the time-based greeting
+  const getGreeting = () => {
+    const currentHour = new Date().getHours();
+    if (currentHour < 12) return 'Good Morning';
+    if (currentHour < 18) return 'Good Afternoon';
+    if (currentHour < 20) return 'Good Evening';
+    return 'Good Night';
+  };
+
   const handleLogout = async () => {
     console.log('Logout');
+    // Add your logout logic here
   };
 
   const handleClose = (event) => {
@@ -64,6 +63,11 @@ const ProfileSection = () => {
     setOpen(false);
   };
 
+
+  const logout = () => {
+    Cookies.remove('Auth_Toekn');
+   navigate('/pages/login/login3')
+  }
   const handleListItemClick = (event, index, route = '') => {
     setSelectedIndex(index);
     handleClose(event);
@@ -72,6 +76,7 @@ const ProfileSection = () => {
       navigate(route);
     }
   };
+
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -100,27 +105,13 @@ const ProfileSection = () => {
             background: `${theme.palette.primary.main}!important`,
             color: theme.palette.primary.light,
             '& svg': {
-              stroke: theme.palette.primary.light
-            }
+              stroke: theme.palette.primary.light,
+            },
           },
           '& .MuiChip-label': {
-            lineHeight: 0
-          }
+            lineHeight: 0,
+          },
         }}
-        icon={
-          <Avatar
-            src={User1}
-            sx={{
-              ...theme.typography.mediumAvatar,
-              margin: '8px 0 8px 8px !important',
-              cursor: 'pointer'
-            }}
-            ref={anchorRef}
-            aria-controls={open ? 'menu-list-grow' : undefined}
-            aria-haspopup="true"
-            color="inherit"
-          />
-        }
         label={<IconSettings stroke={1.5} size="1.5rem" color={theme.palette.primary.main} />}
         variant="outlined"
         ref={anchorRef}
@@ -141,10 +132,10 @@ const ProfileSection = () => {
             {
               name: 'offset',
               options: {
-                offset: [0, 14]
-              }
-            }
-          ]
+                offset: [0, 14],
+              },
+            },
+          ],
         }}
       >
         {({ TransitionProps }) => (
@@ -155,28 +146,18 @@ const ProfileSection = () => {
                   <Box sx={{ p: 2, pb: 0 }}>
                     <Stack>
                       <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Typography variant="h4">Good Morning,</Typography>
+                        <Typography variant="h4">{getGreeting()},</Typography>
                         <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
-                          Johne Doe
+                          {AuthService.getUserFromToken().firstName +
+                            ' ' +
+                            AuthService.getUserFromToken().lastName}
                         </Typography>
                       </Stack>
-                      <Typography variant="subtitle2">Project Admin</Typography>
                     </Stack>
-                    
                   </Box>
                   <PerfectScrollbar style={{ height: '100%', maxHeight: 'calc(100vh - 250px)', overflowX: 'hidden' }}>
                     <Box sx={{ p: 2, pt: 0 }}>
-                      {/* <UpgradePlanCard /> */}
                       <Divider />
-                      <Card
-                        sx={{
-                          bgcolor: theme.palette.primary.light,
-                          my: 1
-                        }}
-                      >
-                      
-                      </Card>
-                    
                       <List
                         component="nav"
                         sx={{
@@ -185,12 +166,9 @@ const ProfileSection = () => {
                           minWidth: 300,
                           backgroundColor: theme.palette.background.paper,
                           borderRadius: '10px',
-                          [theme.breakpoints.down('md')]: {
-                            minWidth: '100%'
-                          },
                           '& .MuiListItemButton-root': {
-                            mt: 0.5
-                          }
+                            mt: 0.5,
+                          },
                         }}
                       >
                         <ListItemButton
@@ -203,7 +181,7 @@ const ProfileSection = () => {
                           </ListItemIcon>
                           <ListItemText primary={<Typography variant="body2">Account Settings</Typography>} />
                         </ListItemButton>
-                       
+
                         <ListItemButton
                           sx={{ borderRadius: `${customization.borderRadius}px` }}
                           selected={selectedIndex === 4}
@@ -212,7 +190,7 @@ const ProfileSection = () => {
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="1.3rem" />
                           </ListItemIcon>
-                          <ListItemText primary={<Typography variant="body2">Logout</Typography>} />
+                          <ListItemText primary={<Typography variant="body2" onClick={logout}>Logout</Typography>} />
                         </ListItemButton>
                       </List>
                     </Box>

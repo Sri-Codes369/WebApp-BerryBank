@@ -15,6 +15,8 @@ import NavigationScroll from 'layout/NavigationScroll';
 import initializeTokenService from 'TokenService';
 import AuthService from 'services/AuthService';
 
+import 'primeicons/primeicons.css';
+        
 // ==============================|| APP ||============================== //
 
 const App = () => {

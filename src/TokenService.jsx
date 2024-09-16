@@ -25,8 +25,6 @@ const extendTokenIfNeeded = async () => {
       console.error('Error extending token:', error);
       // Handle token refresh failure, possibly log out the user if necessary
     }
-  }else{
-    Cookies.remove('Auth_Token')
   }
 };
 

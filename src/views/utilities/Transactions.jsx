@@ -14,7 +14,6 @@ const columns = [
   { id: 'card', label: 'Card' },
   { id: 'date', label: 'Date' },
   { id: 'amount', label: 'Amount' },
-  { id: 'receipt', label: 'Receipt' },
 ];
 
 const transactionData = [
