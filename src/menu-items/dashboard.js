@@ -1,29 +1,22 @@
 // assets
 import { IconDashboard } from '@tabler/icons-react';
-import { IconTransactionRupee  ,
-   IconCreditCard , 
-   IconShadow, 
-   IconWindmill,
-   IconReportMoney , 
-   IconFriends  } from '@tabler/icons-react';
+import { IconTransactionRupee, IconCreditCard, IconUsers, IconWindmill, IconReportMoney, IconFriends } from '@tabler/icons-react';
+import AuthService from 'services/AuthService'; // Import AuthService
+
 // constant
 const icons = { 
   IconDashboard,
   IconTransactionRupee,
   IconCreditCard,
-  IconShadow,
+  IconUsers,
   IconWindmill,
   IconFriends,
   IconReportMoney
- };
+};
 
-// ==============================|| DASHBOARD MENU ITEMS ||============================== //
-
-const dashboard = {
-  id: 'dashboard',
-  title: '',
-  type: 'group',
-  children: [
+// Function to get menu items based on roleId
+const getMenuItems = (roleId) => {
+  const commonItems = [
     {
       id: 'dashboard',
       title: 'Dashboard',
@@ -45,34 +38,56 @@ const dashboard = {
       title: 'Cards',
       type: 'item',
       url: '/utils/util-cards',
-      icon: icons.IconCreditCard ,
-      breadcrumbs: false
-    },
-    // {
-    //   id: 'util-shadow',
-    //   title: 'Shadow',
-    //   type: 'item',
-    //   url: '/utils/util-shadow',
-    //   icon: icons.IconShadow,
-    //   breadcrumbs: false
-    // },
-    {
-      id: 'util-beneficiary',
-      title: 'Beneficiaries',
-      type: 'item',
-      url: '/utils/util-beneficiary',
-      icon: icons.IconFriends,
-      breadcrumbs: false
-    },
-    {
-      id: 'util-accounts',
-      title: 'Accounts',
-      type: 'item',
-      url: '/utils/util-accounts',
-      icon: icons.IconReportMoney,
+      icon: icons.IconCreditCard,
       breadcrumbs: false
     }
-  ]
+  ];
+
+  const roleBasedItems = roleId === 1
+    ? [
+        {
+          id: 'util-users',
+          title: 'Users',
+          type: 'item',
+          url: '/utils/util-users',
+          icon: icons.IconUsers,
+          breadcrumbs: false
+        }
+      ]
+    : roleId === 2
+    ? [
+        {
+          id: 'util-beneficiary',
+          title: 'Beneficiaries',
+          type: 'item',
+          url: '/utils/util-beneficiary',
+          icon: icons.IconFriends,
+          breadcrumbs: false
+        }
+      ]
+    : []; // If roleId is neither 1 nor 2, no role-based items
+
+  return {
+    id: 'dashboard',
+    title: '',
+    type: 'group',
+    children: [
+      ...commonItems,
+      ...roleBasedItems,
+      {
+        id: 'util-accounts',
+        title: 'Accounts',
+        type: 'item',
+        url: '/utils/util-accounts',
+        icon: icons.IconReportMoney,
+        breadcrumbs: false
+      }
+    ]
+  };
 };
+
+// Fetch the user's roleId and generate the menu items
+const roleId = AuthService.getUserFromToken().roleId;
+const dashboard = getMenuItems(roleId);
 
 export default dashboard;

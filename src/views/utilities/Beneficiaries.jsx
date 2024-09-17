@@ -12,7 +12,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import AuthService from 'services/AuthService';
-
+import TransactionForm from './TransactionForm';
 // Validation Schema using Yup
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Beneficiary Name is required'),
@@ -42,7 +42,8 @@ const Beneficiary = () => {
   const [editBeneficiary, setEditBeneficiary] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const toast = React.useRef(null); 
-
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false); 
+  const [selectedPaymentData, setSelectedPaymentData] = useState({ IFSC: '', accountNumber: '' });
   useEffect(() => {
     fetchBeneficiaries();
     fetchBeneficiaryTypes();
@@ -129,6 +130,27 @@ const Beneficiary = () => {
     setShowForm(true);
   };
 
+   // Handle Payment Dialog
+   const handlePayment = (rowData) => {
+    console.log(rowData);
+    
+    setSelectedPaymentData({
+      IFSC: rowData.ifscCode,
+      accountNumber: rowData.accountNumber,
+    });
+    console.log(selectedPaymentData.IFSC);
+    console.log(selectedPaymentData.accountNumber);
+    
+    
+    setShowPaymentDialog(true);
+  };
+
+  // Close Payment Dialog
+  const closePaymentDialog = () => {
+    setShowPaymentDialog(false);
+    setSelectedPaymentData({ IFSC: '', accountNumber: '' });
+  };
+
   // Handle Delete
   const handleDelete = (rowData) => {
     confirmDialog({
@@ -152,7 +174,8 @@ const Beneficiary = () => {
     return (
       <div className='flex'>
         <Button icon="pi pi-pencil" rounded text raised aria-label="Edit" onClick={() => handleEdit(rowData)} />
-        <Button icon="pi pi-trash" severity="warning" rounded text raised aria-label="Delete" onClick={() => handleDelete(rowData)} />
+        <Button icon="pi pi-trash" className='mx-2' severity="warning" rounded text raised aria-label="Delete" onClick={() => handleDelete(rowData)} />
+        <Button icon="pi pi-wallet" severity="success" rounded text raised aria-label="Make Payment" onClick={() => handlePayment(rowData)}/>
       </div>
     );
   };
@@ -270,6 +293,11 @@ const Beneficiary = () => {
             </Form>
           )}
         </Formik>
+      </Dialog>
+
+      {/* Payment Dialog */}
+      <Dialog visible={showPaymentDialog} onHide={closePaymentDialog} header="Make Payment">
+        <TransactionForm ifsc={selectedPaymentData.IFSC} accountNumber={selectedPaymentData.accountNumber} />
       </Dialog>
     </div>
   );

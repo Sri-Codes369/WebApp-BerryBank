@@ -17,7 +17,7 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard')));
 // utilities routing
 const UtilsTransactions = Loadable(lazy(() => import('views/utilities/Transactions')));
 const UtilsCards = Loadable(lazy(() => import('views/utilities/MoneyCards')));
-const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
+const UtilsUsers = Loadable(lazy(() => import('views/utilities/Users')));
 const UtilsBeneficiaries = Loadable(lazy(() => import('views/utilities/Beneficiaries')));
 const UtilsAccounts = Loadable(lazy(() => import('views/utilities/Accounts')))
 
@@ -66,8 +66,8 @@ const routes = [
             element: <UtilsCards />
           },
           {
-            path: 'utils/util-shadow',
-            element: <UtilsShadow />
+            path: 'utils/util-users',
+            element: <UtilsUsers />
           },
           {
             path: 'utils/util-beneficiary',

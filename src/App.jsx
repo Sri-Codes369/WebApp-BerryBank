@@ -16,6 +16,7 @@ import initializeTokenService from 'TokenService';
 import AuthService from 'services/AuthService';
 
 import 'primeicons/primeicons.css';
+import 'primereact/resources/themes/saga-purple/theme.css'
         
 // ==============================|| APP ||============================== //
 
