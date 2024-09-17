@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { useRef } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -8,7 +10,6 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
-import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -19,6 +20,8 @@ import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { useNavigate } from 'react-router-dom';
+import { Toast } from 'primereact/toast';
 
 // third party
 import * as Yup from 'yup';
@@ -45,9 +48,7 @@ const AuthRegister = ({ ...others }) => {
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState();
 
-  const googleHandler = async () => {
-    console.error('Register');
-  };
+ 
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -67,115 +68,99 @@ const AuthRegister = ({ ...others }) => {
     changePassword('123456');
   }, []);
 
+  const toast = useRef(null);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (values, { setErrors, setSubmitting }) => {
+   
+    
+    try {
+      const response = await axios.post(import.meta.env.VITE_IBANK_API_BASE+'register', {
+        userName: values.userName,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        phone: values.phone
+      });
+
+      const { ResponseCode, Response } = response.data;
+
+      // Handle the response based on ResponseCode
+      switch (ResponseCode) {
+        case -1:
+          toast.current.show({ severity: 'warn', summary: 'Warning', detail: 'User Name Already Exists...!', life: 3000 });
+          break;
+        case -2:
+          toast.current.show({ severity: 'warn', summary: 'Warning', detail: 'Email Already Exists...!', life: 3000 });
+          break;
+        case -3:
+          toast.current.show({ severity: 'warn', summary: 'Warning', detail: 'Phone Number Already Exists...!', life: 3000 });
+          break;
+        case 0:
+          toast.current.show({ severity: 'success', summary: 'Success', detail: 'User Registered Successfully', life: 3000 });
+          setTimeout(() => {
+            navigate('/pages/login/login3'); 
+          }, 3000);// Redirect to login page on success
+          break;
+        default:
+          toast.current.show({ severity: 'error', summary: 'Error', detail: 'Unexpected error occurred', life: 3000 });
+          break;
+      }
+    } catch (error) {
+      console.error('Registration error', error);
+      toast.current.show({ severity: 'error', summary: 'Error', detail: error.message || 'Something went wrong', life: 3000 });
+      setErrors({ submit: error.message || 'Something went wrong' });
+    }
+    setSubmitting(false);
+  };
+
   return (
     <>
+     <Toast ref={toast} position='top-center' />
       <Grid container direction="column" justifyContent="center" spacing={2}>
-        <Grid item xs={12}>
-          <AnimateButton>
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={googleHandler}
-              size="large"
-              sx={{
-                color: 'grey.700',
-                backgroundColor: theme.palette.grey[50],
-                borderColor: theme.palette.grey[100]
-              }}
-            >
-              <Box sx={{ mr: { xs: 1, sm: 2, width: 20 } }}>
-                <img src={Google} alt="google" width={16} height={16} style={{ marginRight: matchDownSM ? 8 : 16 }} />
-              </Box>
-              Sign up with Google
-            </Button>
-          </AnimateButton>
-        </Grid>
-        <Grid item xs={12}>
-          <Box sx={{ alignItems: 'center', display: 'flex' }}>
-            <Divider sx={{ flexGrow: 1 }} orientation="horizontal" />
-            <Button
-              variant="outlined"
-              sx={{
-                cursor: 'unset',
-                m: 2,
-                py: 0.5,
-                px: 7,
-                borderColor: `${theme.palette.grey[100]} !important`,
-                color: `${theme.palette.grey[900]}!important`,
-                fontWeight: 500,
-                borderRadius: `${customization.borderRadius}px`
-              }}
-              disableRipple
-              disabled
-            >
-              OR
-            </Button>
-            <Divider sx={{ flexGrow: 1 }} orientation="horizontal" />
-          </Box>
-        </Grid>
-        <Grid item xs={12} container alignItems="center" justifyContent="center">
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1">Sign up with Email address</Typography>
-          </Box>
-        </Grid>
       </Grid>
 
       <Formik
         initialValues={{
-          email: '',
+          userName: '',
           password: '',
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
+          userName: Yup.string().max(255).required('User Name is required'),
+          password: Yup.string().max(255).required('Password is required'),
+          firstName: Yup.string().max(255).required('First Name is required'),
+          lastName: Yup.string().max(255).required('Last Name is required'),
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-          password: Yup.string().max(255).required('Password is required')
+          phone: Yup.string().max(15).required('Phone Number is required')
         })}
+        onSubmit={handleSubmit}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
-            <Grid container spacing={matchDownSM ? 0 : 2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="First Name"
-                  margin="normal"
-                  name="fname"
-                  type="text"
-                  defaultValue=""
-                  sx={{ ...theme.typography.customInput }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Last Name"
-                  margin="normal"
-                  name="lname"
-                  type="text"
-                  defaultValue=""
-                  sx={{ ...theme.typography.customInput }}
-                />
-              </Grid>
-            </Grid>
-            <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-email-register">Email Address / Username</InputLabel>
-              <OutlinedInput
-                id="outlined-adornment-email-register"
-                type="email"
-                value={values.email}
-                name="email"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                inputProps={{}}
-              />
-              {touched.email && errors.email && (
-                <FormHelperText error id="standard-weight-helper-text--register">
-                  {errors.email}
-                </FormHelperText>
-              )}
-            </FormControl>
-
-            <FormControl fullWidth error={Boolean(touched.password && errors.password)} sx={{ ...theme.typography.customInput }}>
+            <TextField
+              fullWidth
+              label="User Name"
+              margin="normal"
+              name="userName"
+              type="text"
+              value={values.userName}
+              onBlur={handleBlur}
+              onChange={handleChange}
+              error={Boolean(touched.userName && errors.userName)}
+              helperText={touched.userName && errors.userName}
+              sx={{ ...theme.typography.customInput }}
+            />
+            <FormControl
+              fullWidth
+              error={Boolean(touched.password && errors.password)}
+              sx={{ ...theme.typography.customInput }}
+            >
               <InputLabel htmlFor="outlined-adornment-password-register">Password</InputLabel>
               <OutlinedInput
                 id="outlined-adornment-password-register"
@@ -227,17 +212,83 @@ const AuthRegister = ({ ...others }) => {
               </FormControl>
             )}
 
+            <Grid container spacing={matchDownSM ? 0 : 2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  margin="normal"
+                  name="firstName"
+                  type="text"
+                  value={values.firstName}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={Boolean(touched.firstName && errors.firstName)}
+                  helperText={touched.firstName && errors.firstName}
+                  sx={{ ...theme.typography.customInput }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  margin="normal"
+                  name="lastName"
+                  type="text"
+                  value={values.lastName}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={Boolean(touched.lastName && errors.lastName)}
+                  helperText={touched.lastName && errors.lastName}
+                  sx={{ ...theme.typography.customInput }}
+                />
+              </Grid>
+            </Grid>
+            
+            <TextField
+              fullWidth
+              label="Email"
+              margin="normal"
+              name="email"
+              type="email"
+              value={values.email}
+              onBlur={handleBlur}
+              onChange={handleChange}
+              error={Boolean(touched.email && errors.email)}
+              helperText={touched.email && errors.email}
+              sx={{ ...theme.typography.customInput }}
+            />
+
+            <TextField
+              fullWidth
+              label="Phone Number"
+              margin="normal"
+              name="phone"
+              type="text"
+              value={values.phone}
+              onBlur={handleBlur}
+              onChange={handleChange}
+              error={Boolean(touched.phone && errors.phone)}
+              helperText={touched.phone && errors.phone}
+              sx={{ ...theme.typography.customInput }}
+            />
+
             <Grid container alignItems="center" justifyContent="space-between">
               <Grid item>
                 <FormControlLabel
                   control={
-                    <Checkbox checked={checked} onChange={(event) => setChecked(event.target.checked)} name="checked" color="primary" />
+                    <Checkbox
+                      checked={checked}
+                      onChange={(event) => setChecked(event.target.checked)}
+                      name="checked"
+                      color="primary"
+                    />
                   }
                   label={
                     <Typography variant="subtitle1">
                       Agree with &nbsp;
                       <Typography variant="subtitle1" component={Link} to="#">
-                        Terms & Condition.
+                        Terms & Conditions.
                       </Typography>
                     </Typography>
                   }
@@ -252,7 +303,15 @@ const AuthRegister = ({ ...others }) => {
 
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
-                <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
+                <Button
+                  disableElevation
+                  disabled={isSubmitting}
+                  fullWidth
+                  size="large"
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                >
                   Sign up
                 </Button>
               </AnimateButton>

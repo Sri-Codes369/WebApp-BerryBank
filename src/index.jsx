@@ -26,6 +26,9 @@ import '@fontsource/poppins/700.css';
 
 // style + assets
 import 'assets/scss/style.scss';
+
+import "primereact/resources/themes/lara-light-cyan/theme.css";
+
 import reportWebVitals from 'reportWebVitals';
 
 const container = document.getElementById('root');

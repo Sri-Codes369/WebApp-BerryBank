@@ -1,62 +1,108 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { TabView, TabPanel } from 'primereact/tabview';
 import Grid from '@mui/material/Grid';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import MainCard from 'ui-component/cards/MainCard';
-import SubCard from 'ui-component/cards/SubCard';
-import { gridSpacing } from 'store/constant';
-import ConfigurableTransactionTable from 'ui-component/ConfigurableTransactionTable';
+import axios from 'axios';
+import AuthService from 'services/AuthService'; // Assuming you have AuthService
+import 'primereact/resources/themes/saga-blue/theme.css';  // PrimeReact theme
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';
 
-const columns = [
-  { id: 'description', label: 'Description' },
-  { id: 'id', label: 'Transaction ID' },
-  { id: 'type', label: 'Type' },
-  { id: 'card', label: 'Card' },
-  { id: 'date', label: 'Date' },
-  { id: 'amount', label: 'Amount' },
-  { id: 'receipt', label: 'Receipt' },
-];
-
-const transactionData = [
-  { id: 1, date: '28 Jan, 12:30 AM', description: 'Spotify Subscription', type: 'Shopping', card: '1234 ****', amount: '-$2,500', income: false },
-  { id: 2, date: '25 Jan, 10:40 PM', description: 'Freepik Sales', type: 'Transfer', card: '1234 ****', amount: '+$750', income: true },
-  { id: 3, date: '20 Jan, 10:40 PM', description: 'Mobile Service', type: 'Service', card: '1234 ****', amount: '-$150', income: false },
-  { id: 4, date: '15 Jan, 03:29 PM', description: 'Wilson', type: 'Transfer', card: '1234 ****', amount: '-$1,050', income: false },
-  { id: 5, date: '14 Jan, 10:40 PM', description: 'Emilly', type: 'Transfer', card: '1234 ****', amount: '+$840', income: true },
-];
-
+// Columns based on the actual DTO from your API
 const Transactions = () => {
   const [tabValue, setTabValue] = useState(0);
+  const [transactions, setTransactions] = useState([]);
 
-  const handleChange = (event, newValue) => {
-    setTabValue(newValue);
+  const fetchTransactions = async () => {
+    try {
+      const user = AuthService.getUserFromToken();
+      const queryType = user.roleId === 1 ? 1 : 2;
+      const userId = user.userId;
+
+      const response = await axios.get('http://localhost:8080/api/transactions', {
+        params: {
+          queryType: queryType,
+          userId: userId,
+        },
+      });
+
+      // Set transactions based on the API response
+      setTransactions(response.data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    }
   };
 
-  const filteredTransactions = transactionData.filter((transaction) => {
-    if (tabValue === 1) return transaction.income;
-    if (tabValue === 2) return !transaction.income;
+  useEffect(() => {
+    fetchTransactions();
+  }, [tabValue]);
+
+  // Filtering the transactions based on tab selection (Income/Expense)
+  const filteredTransactions = transactions.filter((transaction) => {
+    if (tabValue === 1) return transaction.transactionType === 'Credit';
+    if (tabValue === 2) return transaction.transactionType === 'Debit';
     return true;
   });
 
+  // Template for Amount column to style positive (green) and negative (red) amounts
+  const amountBodyTemplate = (rowData) => {
+    const amount = rowData.amount;
+    const color = amount < 0 ? 'red' : 'green';
+    return <span style={{ color: color }}>{amount < 0 ? '-' : '+'}${Math.abs(amount)}</span>;
+  };
+
+  // Template for Transaction Type column to style based on Credit/Debit
+  const transactionTypeTemplate = (rowData) => {
+    const type = rowData.transactionType;
+    const color = type === 'Credit' ? 'green' : 'red';
+    return <span style={{ color: color }}>{type}</span>;
+  };
+
   return (
-    <MainCard title="Recent Transactions">
-      <Grid container spacing={gridSpacing}>
+    <MainCard title="Transactions">
+      <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Tabs value={tabValue} onChange={handleChange} indicatorColor="primary" textColor="primary">
-            <Tab label="All Transactions" />
-            <Tab label="Income" />
-            <Tab label="Expense" />
-          </Tabs>
-          <SubCard>
-            <ConfigurableTransactionTable
-              rows={filteredTransactions}
-              columns={columns}
-              rowsPerPageOptions={[3,5, 10, 25]}
-              defaultRowsPerPage={10}
-              showRowsPerPageOptions={true} // Hide the dropdown for rows per page
-              sortable={true} // Enable sorting
-            />
-          </SubCard>
+          <TabView activeIndex={tabValue} onTabChange={(e) => setTabValue(e.index)}>
+            <TabPanel header="All Transactions">
+              <DataTable value={filteredTransactions} paginator rows={10} rowsPerPageOptions={[3, 5, 10, 25]}>
+                <Column field="transactionId" header="Transaction ID" sortable />
+                <Column field="senderName" header="Sender" sortable />
+                <Column field="recipientName" header="Recipient" sortable />
+                <Column field="amount" header="Amount" body={amountBodyTemplate} sortable />
+                <Column field="transactionDate" header="Transaction Date" sortable />
+                <Column field="status" header="Status" sortable />
+                <Column field="transactionType" header="Transaction Type" body={transactionTypeTemplate} sortable />
+                <Column field="referenceNumber" header="Reference Number" sortable />
+              </DataTable>
+            </TabPanel>
+            <TabPanel header="Income">
+              <DataTable value={filteredTransactions} paginator rows={10} rowsPerPageOptions={[3, 5, 10, 25]}>
+                <Column field="transactionId" header="Transaction ID" sortable />
+                <Column field="senderAccountId" header="Sender Account ID" sortable />
+                <Column field="recipientFullName" header="Recipient Full Name" sortable />
+                <Column field="amount" header="Amount" body={amountBodyTemplate} sortable />
+                <Column field="transactionDate" header="Transaction Date" sortable />
+                <Column field="status" header="Status" sortable />
+                <Column field="transactionType" header="Transaction Type" body={transactionTypeTemplate} sortable />
+                <Column field="referenceNumber" header="Reference Number" sortable />
+              </DataTable>
+            </TabPanel>
+            <TabPanel header="Expense">
+              <DataTable value={filteredTransactions} paginator rows={10} rowsPerPageOptions={[3, 5, 10, 25]}>
+                <Column field="transactionId" header="Transaction ID" sortable />
+                <Column field="senderAccountId" header="Sender Account ID" sortable />
+                <Column field="recipientFullName" header="Recipient Full Name" sortable />
+                <Column field="amount" header="Amount" body={amountBodyTemplate} sortable />
+                <Column field="transactionDate" header="Transaction Date" sortable />
+                <Column field="status" header="Status" sortable />
+                <Column field="transactionType" header="Transaction Type" body={transactionTypeTemplate} sortable />
+                <Column field="referenceNumber" header="Reference Number" sortable />
+              </DataTable>
+            </TabPanel>
+          </TabView>
         </Grid>
       </Grid>
     </MainCard>
