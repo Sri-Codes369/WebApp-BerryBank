@@ -16,6 +16,7 @@ const icons = {
 
 // Function to get menu items based on roleId
 const getMenuItems = (roleId) => {
+  
   const commonItems = [
     {
       id: 'dashboard',
@@ -87,7 +88,11 @@ const getMenuItems = (roleId) => {
 };
 
 // Fetch the user's roleId and generate the menu items
-const roleId = AuthService.getUserFromToken().roleId;
-const dashboard = getMenuItems(roleId);
+const userFromToken = AuthService.getUserFromToken();
+const roleId = userFromToken ? userFromToken.roleId : null;
 
+// Generate the menu items only if roleId is valid
+const dashboard = getMenuItems(roleId || 0); // Set a default roleId (0 or whatever is appropriate)
+
+// Export dashboard
 export default dashboard;
